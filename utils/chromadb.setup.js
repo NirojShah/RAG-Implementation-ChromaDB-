@@ -1,16 +1,31 @@
-// chroma.js
-import { ChromaClient } from "chromadb";
-import { getEmbedding } from "./llm.js";
+const { ChromaClient } = require("chromadb");
+const { getEmbedding } = require("./llm.setup.js"); // fixed import
 
-const chroma = new ChromaClient({ path: "http://localhost:8000" });
+let chroma;
+
+const connectToChromaDB = (db_path) => {
+  chroma = new ChromaClient({ path: db_path });
+};
+
+// Check connection
+async function checkChromaConnection() {
+  try {
+    await chroma.listCollections(); // simple ping
+    console.log("✅ Connected to ChromaDB");
+    return true;
+  } catch (err) {
+    console.error("❌ Could not connect to ChromaDB:", err.message);
+    return false;
+  }
+}
 
 // Create or fetch collection
-export async function getCollection(name = "docs") {
+async function getCollection(name = "docs") {
   return await chroma.getOrCreateCollection({ name });
 }
 
 // Add a document to Chroma
-export async function addDocument(id, text) {
+async function addDocument(id, text) {
   const collection = await getCollection();
   const embedding = await getEmbedding(text);
 
@@ -24,9 +39,9 @@ export async function addDocument(id, text) {
 }
 
 // Query Chroma and fallback to LLM if nothing found
-import { chatWithLLM } from "./llm.setup.js";
+const { chatWithLLM } = require("./llm.setup.js");
 
-export async function askQuestion(question) {
+async function askQuestion(question) {
   const collection = await getCollection();
   const queryEmbedding = await getEmbedding(question);
 
@@ -43,3 +58,11 @@ export async function askQuestion(question) {
     return await chatWithLLM(question);
   }
 }
+
+module.exports = {
+  checkChromaConnection,
+  getCollection,
+  addDocument,
+  askQuestion,
+  connectToChromaDB,
+};
