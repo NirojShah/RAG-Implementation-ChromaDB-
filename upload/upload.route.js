@@ -1,4 +1,4 @@
-const { Router } = import("express");
+const { Router } = require("express");
 
 const uploadRouter = Router();
 
