@@ -1,7 +1,9 @@
 const { Router } = require("express");
+const { handleUpload, askQuery } = require("./upload.controller");
 
 const uploadRouter = Router();
 
-uploadRouter.post("/");
+uploadRouter.post("/", handleUpload);
+uploadRouter.post("/query", askQuery);
 
-export { uploadRouter };
+module.exports = { uploadRouter };
