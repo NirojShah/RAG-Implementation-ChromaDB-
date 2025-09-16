@@ -15,7 +15,7 @@ async function getEmbedding(text) {
 // Chat with Ollama (LLM fallback)
 async function chatWithLLM(question) {
   const response = await ollama.chat({
-    model: "llama3.1", // or any model you pulled in Ollama
+    model: "deepseek-r1:1.5b", // or any model you pulled in Ollama
     messages: [{ role: "user", content: question }],
   });
   return response.message.content;
