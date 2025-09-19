@@ -16,6 +16,11 @@ const chatSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    file_id: {
+      type: String,
+      required: true,
+      ref: "File",
+    },
   },
   {
     timestamps: true,
@@ -34,23 +39,24 @@ const messagesSchema = new mongoose.Schema(
       required: true,
       ref: "Chat",
     },
-    message: {
-      type: String,
-      required: true,
-    },
-    response: {
-      type: String,
-      required: true,
-    },
     user_id: {
+      type: String,
+      required: true,
+      ref: "User",
+    },
+    role: {
+      type: String,
+      enum: ["user", "assistant"],
+      required: true,
+    },
+    content: {
       type: String,
       required: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
+
 const Chat = mongoose.model("Chat", chatSchema);
 const Message = mongoose.model("Message", messagesSchema);
 
