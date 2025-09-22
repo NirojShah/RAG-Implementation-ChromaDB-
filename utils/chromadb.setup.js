@@ -1,3 +1,4 @@
+const { chatWithLLM } = require("./llm.setup.js");
 const { ChromaClient } = require("chromadb");
 const { getEmbedding } = require("./llm.setup.js"); // fixed import
 
@@ -7,7 +8,6 @@ const connectToChromaDB = (db_path) => {
   chroma = new ChromaClient({ path: db_path });
 };
 
-// Check connection
 async function checkChromaConnection() {
   try {
     await chroma.listCollections(); // simple ping
@@ -19,13 +19,11 @@ async function checkChromaConnection() {
   }
 }
 
-// Create or fetch collection
 async function getCollection(name = "docs") {
   return await chroma.getOrCreateCollection({ name });
 }
 
-// Add a document to Chroma
-async function addDocument(id, text) {
+async function addDocument(id, text, fileId, userId) {
   const collection = await getCollection();
   const embedding = await getEmbedding(text);
 
@@ -33,29 +31,46 @@ async function addDocument(id, text) {
     ids: [id],
     documents: [text],
     embeddings: [embedding],
+    metadatas: [{ fileId, userId }],
   });
 
-  console.log(`✅ Document added with ID: ${id}`);
+  console.log(`Document added with ID: ${id} for File: ${fileId}`);
 }
 
 // Query Chroma and fallback to LLM if nothing found
-const { chatWithLLM } = require("./llm.setup.js");
 
-async function askQuestion(question) {
+async function askQuestion(question, userId, fileId) {
   const collection = await getCollection();
   const queryEmbedding = await getEmbedding(question);
 
   const results = await collection.query({
     queryEmbeddings: [queryEmbedding],
     nResults: 1,
+    where: {
+      userId: userId,
+      fileId: fileId,
+    },
   });
 
   if (results.documents?.[0]?.length) {
-    console.log("📂 Answer from ChromaDB");
+    console.log("Answer from ChromaDB");
     return results.documents[0][0];
   } else {
-    console.log("🧠 Answer from LLM");
+    console.log("Answer from LLM");
     return await chatWithLLM(question);
+  }
+}
+// Delete ALL collections (wipe ChromaDB)
+async function deleteAllData() {
+  try {
+    const collections = await chroma.listCollections();
+    for (const col of collections) {
+      await chroma.deleteCollection({ name: col.name });
+      console.log(`Deleted collection: ${col.name}`);
+    }
+    console.log("All ChromaDB data deleted");
+  } catch (err) {
+    console.error("Failed to delete ChromaDB data:", err.message);
   }
 }
 
@@ -65,4 +80,5 @@ module.exports = {
   addDocument,
   askQuestion,
   connectToChromaDB,
+  deleteAllData,
 };
