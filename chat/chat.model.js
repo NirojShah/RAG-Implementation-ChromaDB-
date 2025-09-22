@@ -14,12 +14,9 @@ const chatSchema = new mongoose.Schema(
     user_id: {
       type: String,
       required: true,
-      ref: "User",
     },
     file_id: {
       type: String,
-      required: true,
-      ref: "File",
     },
   },
   {
