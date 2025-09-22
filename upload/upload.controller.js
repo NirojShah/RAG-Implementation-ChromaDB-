@@ -3,8 +3,7 @@ const { uploadHandler, testing } = require("./upload.service");
 
 const handleUpload = asyncErrorHandler(async (req, res) => {
   const { file } = req.files;
-
-  const resp = await uploadHandler({ file });
+  const resp = await uploadHandler({ file, user_id: req.user.user_id });
   return res.status(200).json({
     status: "success",
     message: "test successfull.",

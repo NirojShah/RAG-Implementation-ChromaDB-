@@ -1,9 +1,19 @@
 const pdfParse = require("pdf-parse");
 const { addDocument, askQuestion } = require("../utils/chromadb.setup");
 const { chatWithLLM } = require("../utils/llm.setup");
+const { CustomError } = require("../utils/CustomError");
+const { File } = require("../files/file.model");
 
 const cleanAnswer = (text) =>
   text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+
+const generateFileId = async () => {
+  const count = await File.countDocuments();
+  if (count == 0) {
+    return `FILE-ID-1`;
+  }
+  return `FILE-ID-${count + 1}`;
+};
 
 function chunkText(text, chunkSize = 500) {
   const words = text.split(" ");
@@ -21,26 +31,35 @@ function chunkText(text, chunkSize = 500) {
   return chunks;
 }
 
-const uploadHandler = async ({ file }) => {
-  // Extract text from PDF
-  const pdfcontent = await pdfParse(file.data);
-  const fullText = pdfcontent.text; // ✅ this is the actual text
+const uploadHandler = async ({ file, user_id }) => {
+  const fileId = await generateFileId();
+  const uploadedfile = await File.create({
+    file_data: file.data,
+    file_name: file.name,
+    file_id: fileId,
+    user_id: user_id,
+    file_mime: file.mimetype,
+  });
 
-  // Chunk text for vector DB storage
+  const pdfcontent = await pdfParse(file.data);
+  const fullText = pdfcontent.text;
   const chunks = chunkText(fullText, 500);
 
-  // Use filename or timestamp as base ID
   const baseId = file.name || `doc_${Date.now()}`;
 
   for (let i = 0; i < chunks.length; i++) {
-    await addDocument(`${baseId}_${i}`, chunks[i]);
+    await addDocument(`${baseId}_${i}`, chunks[i], fileId, user_id);
   }
 
-  console.log(`✅ Stored ${chunks.length} chunks for ${baseId}`);
+  return {
+    file_id: uploadedfile.file_id,
+    status: "success",
+    message: "Uploaded successfully",
+  };
 };
 
-const testing = async (query) => {
-  const x = await askQuestion(query, { limit: 3 });
+const testing = async (query, user_id, file_id) => {
+  const x = await askQuestion(query, user_id, file_id);
 
   const queryWithContent = `
 Answer clearly and concisely. 
