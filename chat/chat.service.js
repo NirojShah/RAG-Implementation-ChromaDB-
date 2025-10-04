@@ -51,7 +51,11 @@ const processGetChat = async ({ chat_id }) => {
 // List all chats of a user
 const listOfMyChat = async ({ user_id }) => {
   try {
-    return await Chat.find({ user_id }).select("chat_id chat_name");
+    const chats = await Chat.find({ user_id }).select("chat_id chat_name");
+    return {
+      success: true,
+      chats
+    }
   } catch (err) {
     throw new CustomError(err.message, 401);
   }
