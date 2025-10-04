@@ -12,6 +12,7 @@ setupEnv();
 const server = http.createServer(app);
 const PORT = process.env.PORT;
 const chroma_path = process.env.CHROMA_PATH;
+connectToDataBase(process.env.MONGODB_URL)
 
 connectToChromaDB(chroma_path);
 checkChromaConnection();
