@@ -1,4 +1,5 @@
 const { uploadHandler } = require("../upload/upload.service");
+const { CustomError } = require("../utils/CustomError");
 const asyncErrorHandler = require("../utils/globalError.controller");
 const {
   createChat,
@@ -61,8 +62,6 @@ const chat_upload_file = asyncErrorHandler(async (req, res) => {
     status: "success",
     ...resp,
   });
-
-  // const resp = await
 });
 
 module.exports = {
