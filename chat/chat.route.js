@@ -18,6 +18,8 @@ chatRouter.delete("/:chatId", deleteChat);
 chatRouter.get("/mychat/:chat_id", mychat);
 chatRouter.post("/upload-file", chat_upload_file);
 
+chatRouter.get("/:chat_id",()=>{console.log("ehh boii")})
+
 module.exports = {
   chatRouter,
 };
