@@ -43,14 +43,14 @@ async function askQuestion(question, userId, fileId) {
   const collection = await getCollection();
   const queryEmbedding = await getEmbedding(question);
 
-  const results = await collection.query({
-    queryEmbeddings: [queryEmbedding],
-    nResults: 1,
-    where: {
-      userId: userId,
-      fileId: fileId,
-    },
-  });
+const results = await collection.query({
+  queryEmbeddings: [queryEmbedding],
+  nResults: 1,
+  where: {
+    fileId: { $eq: fileId },
+  },
+});
+
 
   if (results.documents?.[0]?.length) {
     console.log("Answer from ChromaDB");

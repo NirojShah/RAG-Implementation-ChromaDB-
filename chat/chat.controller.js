@@ -6,6 +6,7 @@ const {
   listOfMyChat,
   processGetChat,
   updateChatFileInfo,
+  chatInformation,
 } = require("./chat.service");
 const { newChatSchema } = require("./chat.validation");
 
@@ -64,6 +65,14 @@ const chat_upload_file = asyncErrorHandler(async (req, res) => {
   });
 });
 
+
+const chatInfo = asyncErrorHandler(async(req ,res)=>{
+  const {chat_id} = req.params
+  const resp = await chatInformation(chat_id)
+  return res.status(200).json(resp)
+})
+
+
 module.exports = {
   getChat,
   chat,
@@ -71,4 +80,5 @@ module.exports = {
   history,
   mychat,
   chat_upload_file,
+  chatInfo
 };

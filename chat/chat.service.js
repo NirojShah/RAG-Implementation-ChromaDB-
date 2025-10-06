@@ -54,8 +54,8 @@ const listOfMyChat = async ({ user_id }) => {
     const chats = await Chat.find({ user_id }).select("chat_id chat_name");
     return {
       success: true,
-      chats
-    }
+      chats,
+    };
   } catch (err) {
     throw new CustomError(err.message, 401);
   }
@@ -64,12 +64,22 @@ const listOfMyChat = async ({ user_id }) => {
 // Update chat file info
 const updateChatFileInfo = async ({ chat_id, file_id }) => {
   try {
-    await Chat.findOneAndUpdate(
-      { chat_id },
+
+    console.log(chat_id,file_id)
+
+    const updatedChat = await Chat.findOneAndUpdate(
+      { chat_id: chat_id },
       { $set: { file_id } },
       { new: true }
     );
-    return { message: "success" };
+
+    console.log(updatedChat)
+
+    if (!updatedChat) {
+      throw new CustomError("Chat not found", 404);
+    }
+
+    return { message: "success", chat: updatedChat };
   } catch (err) {
     throw new CustomError(err.message, 500);
   }
@@ -133,6 +143,15 @@ const deleteChat = async ({ chat_id }) => {
   }
 };
 
+const chatInformation = async (chat_id) => {
+  try {
+    const chatInfo = await Chat.findOne({ chat_id }).select("");
+    return { success: true, chatInfo };
+  } catch (err) {
+    throw new CustomError(err.message, 500);
+  }
+};
+
 module.exports = {
   createChat,
   sendMessages,
@@ -142,4 +161,5 @@ module.exports = {
   listOfMyChat,
   processGetChat,
   updateChatFileInfo,
+  chatInformation,
 };
