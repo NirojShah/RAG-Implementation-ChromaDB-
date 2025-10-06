@@ -1,5 +1,8 @@
 const { chatMessages, createMessage } = require("./message.service");
 const asyncErrorHandler = require("../utils/globalError.controller");
+const { CustomError } = require("../utils/CustomError");
+const { askQuestion } = require("../utils/chromadb.setup");
+const { chatInformation } = require("../chat/chat.service");
 
 const getMessages = asyncErrorHandler(async (req, res) => {
   const page = req.query.page || 1;
@@ -15,15 +18,28 @@ const getMessages = asyncErrorHandler(async (req, res) => {
 
 const sendMessage = asyncErrorHandler(async (req, res) => {
   const { user_id } = req.user;
-  const { message } = req.body;
+  const { text } = req.body;
   const chat_id = req.params.chat_id;
   const role = req.user.role;
-  const sendMessage = await createMessage({
-    chat_id,
-    message,
-    role,
-    user_id,
-  });
+
+  const fileInfo = await chatInformation(chat_id)
+
+  const embeddings = await askQuestion(text,user_id,fileInfo.chatInfo.file_id)
+
+  
+
+  console.log({embeddings})
+
+  // const sendMessage = await createMessage({
+  //   chat_id,
+  //   message,
+  //   role,
+  //   user_id,
+  // });
+
+  throw new CustomError("EHH",500)
+
+
 });
 
 module.exports = {
