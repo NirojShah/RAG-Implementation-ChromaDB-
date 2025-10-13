@@ -64,16 +64,11 @@ const listOfMyChat = async ({ user_id }) => {
 // Update chat file info
 const updateChatFileInfo = async ({ chat_id, file_id }) => {
   try {
-
-    console.log(chat_id,file_id)
-
     const updatedChat = await Chat.findOneAndUpdate(
       { chat_id: chat_id },
       { $set: { file_id } },
       { new: true }
     );
-
-    console.log(updatedChat)
 
     if (!updatedChat) {
       throw new CustomError("Chat not found", 404);
