@@ -13,13 +13,30 @@ async function getEmbedding(text) {
 }
 
 // Chat with Ollama (LLM fallback)
-async function chatWithLLM(question) {
-  const response = await ollama.chat({
-    model: "deepseek-r1:1.5b", // or any model you pulled in Ollama
-    messages: [{ role: "user", content: question }],
-  });
-  return response.message.content;
+async function chatWithLLM(question, embeddings) {
+  try {
+    const context = embeddings || "";
+    const response = await ollama.chat({
+      model: "deepseek-r1:1.5b",
+      messages: [
+        {
+          role: "system",
+          content: "You are an assistant that uses context to answer precisely.",
+        },
+        {
+          role: "user",
+          content: `${context ? `Context:\n${context}\n\n` : ""}Question: ${question}`,
+        },
+      ],
+    });
+
+    return response.message.content;
+  } catch (error) {
+    console.error("LLM error:", error);
+    throw new Error("Failed to get response from LLM");
+  }
 }
+
 
 module.exports = {
   getEmbedding,
