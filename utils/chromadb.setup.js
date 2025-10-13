@@ -24,8 +24,8 @@ async function getCollection(name = "docs") {
 }
 
 async function addDocument(id, text, fileId, userId) {
-  const collection = await getCollection();
-  const embedding = await getEmbedding(text);
+  const collection = await getCollection(); // get Chroma collection
+  const embedding = await getEmbedding(text); // generate vector embedding
 
   await collection.add({
     ids: [id],
@@ -37,20 +37,20 @@ async function addDocument(id, text, fileId, userId) {
   console.log(`Document added with ID: ${id} for File: ${fileId}`);
 }
 
+
 // Query Chroma and fallback to LLM if nothing found
 
 async function askQuestion(question, userId, fileId) {
   const collection = await getCollection();
   const queryEmbedding = await getEmbedding(question);
 
-const results = await collection.query({
-  queryEmbeddings: [queryEmbedding],
-  nResults: 1,
-  where: {
-    fileId: { $eq: fileId },
-  },
-});
-
+  const results = await collection.query({
+    queryEmbeddings: [queryEmbedding],
+    nResults: 1,
+    where: {
+      fileId: { $eq: fileId },
+    },
+  });
 
   if (results.documents?.[0]?.length) {
     console.log("Answer from ChromaDB");
