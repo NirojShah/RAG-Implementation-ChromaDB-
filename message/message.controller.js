@@ -10,9 +10,7 @@ const getMessages = asyncErrorHandler(async (req, res) => {
   const limit = req.query.limit || 10;
   const { chat_id } = req.params;
   const skip = page - 1 * limit;
-
   const messages = await chatMessages({ chat_id, limit, skip });
-
   return res.status(200).json(messages);
 });
 
@@ -23,25 +21,15 @@ const sendMessage101 = asyncErrorHandler(async (req, res) => {
   const role = req.user.role;
   const fileInfo = await chatInformation(chat_id)
   const embeddings = await askQuestion(text,user_id,fileInfo.chatInfo.file_id)
-
   const resp = await chatWithLLM(text,embeddings)
-
   const sendMessage = await createMessage({
     chat_id,
     message,
     role,
     user_id,
   });
-
   throw new CustomError("EHH",500)
-
-
 });
-
-
-// import { Readable } from "stream";
-// import ollama from "ollama";
-
 const {Ollama} = require("ollama")
 const {Readable}  = require("stream")
 
@@ -53,15 +41,11 @@ const sendMessage = asyncErrorHandler(async (req, res) => {
   const chat_id = req.params.chat_id;
   const role = req.user.role;
   const fileInfo = await chatInformation(chat_id);
-
-  // Ownership check
   if (fileInfo.chatInfo.user_id !== user_id && role !== 'admin') {
     res.write("data: [ERROR]\n\n");
     res.end();
     return res.status(403).json({ error: 'Unauthorized' });
   }
-
-  // Handle no file case
   if (!fileInfo.chatInfo.file_id) {
     res.write("data: [ERROR] No file uploaded for context.\n\n");
     res.end();
@@ -91,11 +75,9 @@ const sendMessage = asyncErrorHandler(async (req, res) => {
 
   try {
     const embeddings = await askQuestion(text, user_id, fileInfo.chatInfo.file_id);
-    // Assuming embeddings is an array of { text: string, ... } - process to text
     const contextText = embeddings;
-
     const stream = await ollama.chat({
-      model: "deepseek-r1:1.5b", // Verify model name; might be 'deepseek-coder:1.5b' or similar
+      model: "deepseek-r1:1.5b", 
       stream: true,
       messages: [
         {
@@ -109,14 +91,12 @@ const sendMessage = asyncErrorHandler(async (req, res) => {
         },
       ],
     });
-
     let assistantMessage = "";
     for await (const chunk of stream) {
       const token = chunk?.message?.content || "";
       assistantMessage += token;
       res.write(`data: ${token}\n\n`);
     }
-
     await createMessage({
       chat_id,
       message: assistantMessage,
@@ -132,6 +112,8 @@ const sendMessage = asyncErrorHandler(async (req, res) => {
     res.end();
   }
 });
+
+
 
 
 module.exports = {
