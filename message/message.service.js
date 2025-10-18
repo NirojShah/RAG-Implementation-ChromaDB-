@@ -7,6 +7,7 @@ const { generateId } = require("../utils/generate_id");
 
 const chatMessages = async ({ chat_id, limit, skip }) => {
   try {
+
     const messages = await Message.find({
       chat_id,
     })
@@ -15,13 +16,13 @@ const chatMessages = async ({ chat_id, limit, skip }) => {
       messages,
     };
   } catch (err) {
-    console.log(err);
     throw new CustomError(err.messages, 500);
   }
 };
 
 const createMessage = async ({ chat_id, message, role, user_id }) => {
   try {
+    
     const messageId = await generateId(Message,"message_id","MESSAGE")
     const newMessage = await Message.create({
       chat_id: chat_id,
@@ -42,5 +43,6 @@ const createMessage = async ({ chat_id, message, role, user_id }) => {
 
 module.exports = {
   chatMessages,
+
   createMessage,
 };
