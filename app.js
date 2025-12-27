@@ -22,7 +22,6 @@ app.use("/app/v1/file", authenticateUser, uploadRouter);
 app.use("/app/v1/chat", authenticateUser, chatRouter);
 app.use("/app/v1/message",authenticateUser, messageRouter)
 
-// Global error handler (should be the last middleware)
 app.use(globalErrorHandler);
 
 module.exports = { app };
