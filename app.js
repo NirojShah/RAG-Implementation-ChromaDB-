@@ -14,6 +14,7 @@ app.get("/status", (req, res) => {
     status: "success",
   });
 });
+
 app.use("/app/v1/user", userRouter);
 app.use("/app/v1/file", authenticateUser, uploadRouter);
 app.use("/app/v1/chat", authenticateUser, chatRouter);
